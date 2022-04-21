@@ -86,6 +86,7 @@ def numerical_transitory_solution(n, phi_init, theta, t_max, deltaT, second_orde
     return df_transitory
 
 
+#-------------------------------- PLOT --------------------------------------#
 
 # Add traces, one for each slider step
 deltaT = 4.4
