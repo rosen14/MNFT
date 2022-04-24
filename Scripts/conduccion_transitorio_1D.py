@@ -72,16 +72,17 @@ def numerical_transitory_solution(n, phi_init, theta, t_max, deltaT, second_orde
     
     phi_k = phi_init
     t = 0
+    precision = int(-np.log10(deltaT))
     while t < t_max:
         
         R_matrix = b_matrix + phi_k/deltaT*h - (1 - theta)*np.dot(K_matrix, phi_k)
     
         phi_k1 = np.dot(Minv_matrix, R_matrix)
         
-        t = t + deltaT
+        t = round(t + deltaT, precision)
         phi_k = phi_k1
         
-        df_transitory[str(round(t,4))] = phi_k1
+        df_transitory[str(t)] = phi_k1
     
     return df_transitory
 

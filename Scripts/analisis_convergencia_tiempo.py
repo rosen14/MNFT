@@ -35,8 +35,6 @@ def numerical_transitory_solution(n, phi_init, theta, t_max, deltaT, second_orde
     x_centroides = np.array([0.5*(x_caras[i+1] - x_caras[i]) + x_caras[i] \
                   for i in range(len(x_caras) - 1)])
     
-    df_transitory = pd.DataFrame({'centroides': x_centroides,
-                                  '0': phi_init})
     
     b_matrix = np.zeros((n,))  #Matriz término fuente y C.B.
     K_matrix = np.zeros((n,n)) #Matriz de difusión
@@ -63,19 +61,20 @@ def numerical_transitory_solution(n, phi_init, theta, t_max, deltaT, second_orde
     M_matrix = h/deltaT*np.identity(n) + K_matrix*theta
     Minv_matrix = np.linalg.inv(M_matrix)
     
+    
+    df_transitory = pd.DataFrame({'centroides': x_centroides})
+    
     phi_k = phi_init
-    t = 0
-    while t < t_max:
+    steps = int(t_max/deltaT)
+    for i in range(steps):
         
         R_matrix = b_matrix + phi_k/deltaT*h - (1 - theta)*np.dot(K_matrix, phi_k)
     
         phi_k1 = np.dot(Minv_matrix, R_matrix)
         
-        t = t + deltaT
         phi_k = phi_k1
-        
-        df_transitory[str(round(t,4))] = phi_k1
-    
+            
+    df_transitory[str(t_max)] = phi_k1
     return df_transitory
 
 
