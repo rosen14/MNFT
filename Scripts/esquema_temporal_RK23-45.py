@@ -54,8 +54,6 @@ def get_matrix(n, second_order_dirichlet = False):
 
 K_matrix, b_matrix = get_matrix(n, second_order_dirichlet = True)
 
-
-
 def f(t, y):
     return np.dot(-K_matrix, y) + b_matrix
 
