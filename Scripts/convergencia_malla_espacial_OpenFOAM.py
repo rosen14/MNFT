@@ -7,8 +7,6 @@ Created on Sun May  8 22:14:00 2022
 
 import numpy as np
 import pandas as pd
-import plotly.graph_objects as go
-from plotly.offline import plot
 import os
 
 # CONSTANTES ----------------------------------------------------------------#
