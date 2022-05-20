@@ -58,7 +58,6 @@ def numerical_solution(n, upwind = True, second_order_dirichlet = True):
         #Advección
     if upwind:
         A_matrix[0, 0] = V
-        A_matrix[n-1, n-2] = -V
         ba_matrix[0] = V*phi_0
         for i in range(1, n):
             A_matrix[i,i-1:i+1] = [-V, V]
@@ -137,9 +136,9 @@ print('Pe_x = ', Pex)
 print('Pe_L = ', 0.5*V*L/alpha)
 
 #### ii) Solución con central differences
-x_centroides, phi_numerical_cd = numerical_solution(n, upwind = False, second_order_dirichlet = True)
+x_centroides, phi_numerical_cd = numerical_solution(n, upwind = False, second_order_dirichlet = False)
 #### iii) Solución con upwind
-x_centroides, phi_numerical_uw = numerical_solution(n, upwind = True, second_order_dirichlet = True)
+x_centroides, phi_numerical_uw = numerical_solution(n, upwind = True, second_order_dirichlet = False)
 
 #### iv) Comparar gráficamente CD, Upwind y la solución analítica calculada en
 ####     200 puntos
@@ -184,8 +183,8 @@ err_N = [10*2**(i-1) for i in range(1, 8)]
 
 error_df = pd.DataFrame()
 for N in err_N:
-    xc, phi_numerical_cd = numerical_solution(n, upwind = False, second_order_dirichlet = True)
-    xc, phi_numerical_uw = numerical_solution(n, upwind = True, second_order_dirichlet = True)
+    xc, phi_numerical_cd = numerical_solution(N, upwind = False, second_order_dirichlet = False)
+    xc, phi_numerical_uw = numerical_solution(N, upwind = True, second_order_dirichlet = False)
     phi_analytic = analytic_solution(xc)
     
     norma1_cd = 1/N * np.sum(np.abs(phi_analytic - phi_numerical_cd))
@@ -252,3 +251,5 @@ fig.add_trace(
 fig.update_xaxes(type="log")
 fig.update_yaxes(type="log")
 plot(fig, auto_open=True)
+
+
