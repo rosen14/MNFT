@@ -13,8 +13,8 @@ from plotly.offline import plot
 # CONSTANTES ----------------------------------------------------------------#
 L = 3        # Largo de barra [m]
 S = 1        # Área transversal [m2]
-Q = 0.01     # Fuente/(rho*Cp) [°C/s]
-alpha = 0.01 # Difusividad [m2/s]  k/(rho*Cp)
+Q = 0.01  # Fuente/(rho*Cp) [°C/s]
+alpha = 0.5 # Difusividad [m2/s]  k/(rho*Cp)
 
 
 # Condiciones de Borde de Dirichlet (sobre la temperatura) ------------------#
