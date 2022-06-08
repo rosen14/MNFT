@@ -5,19 +5,22 @@ Created on Tue May 31 20:14:27 2022
 @author: Rosendo
 """
 
-class mesh:
+import numpy as np
+import readGMSH
+class Mesh:
     def __init__(self):
         self.xnod = None
         self.icone = None
         self.C = None
         
-        self.mesh.faces = []
-        self.mesh.owner = []
-        self.mesh.neighbour = []
-        self.mesh.Sf = []
-        self.mesh.Cf = []
-        self.mesh.V = []
-        self.mesh.iface = []
+        self.faces = []
+        self.owner = []
+        self.neighbour = []
+        self.Sf = []
+        self.Cf = []
+        self.V = []
+        self.iface = []
+
     
 def gen2DMesh(filename):
     '''
@@ -31,9 +34,9 @@ def gen2DMesh(filename):
                 - Element to face map added (mesh.ele)
     '''
 
-    mesh = mesh()
+    mesh = Mesh()
     # GMSH reading
-    mesh.xnod, mesh.icone = readGMSH(filename)
+    mesh.xnod, mesh.icone = readGMSH.readGMSH(filename)
     # Override third dimension in points
     mesh.xnod = mesh.xnod[:, 0:2]
 
@@ -55,31 +58,29 @@ def gen2DMesh(filename):
     for i in range(mesh.nelem):
         v = 0
         for j in range(mesh.nen):
-            f = [mesh.icone[i,j], mesh.icone[i, (j % mesh.nen) + 1]]
+            f = [int(mesh.icone[i,j]), int(mesh.icone[i, (j % mesh.nen)])]
             
             # Check if this face already exist
-            mesh.iface = []
-            if mesh.faces:
-                mesh.iface = np.where(mesh.faces[:, 0] == f[1] & mesh.faces[:, 1] == f[1])
-            end
-            if (isempty(mesh.iface))
-                mesh.faces = [mesh.faces; f];
-                mesh.owner = [mesh.owner; i];
-                mesh.neighbour = [mesh.neighbour; 0];
-                vf = mesh.xnod(f(2),:) - mesh.xnod(f(1),:);
-                cf = (mesh.xnod(f(1),:) + mesh.xnod(f(2),:))/2.0;
-                mesh.Sf = [mesh.Sf; vf(2),-vf(1)];
-                mesh.Cf = [mesh.Cf; cf];   
-                %quiver(cf(1),cf(2),mesh.Sf(end,1),mesh.Sf(end,2),0.25,'b');
-                v = v + cf*mesh.Sf(end, :)';
-            else
-                mesh.neighbour(mesh.iface) = i;
-                v = v + mesh.Cf(mesh.iface, :)*(-1)*mesh.Sf(mesh.iface, :)';
-            end
-            % Volumes from Gauss theorem
-        end
-        mesh.V = [mesh.V; v/2];
-    end
+            mesh.iface = -1
+            if len(mesh.faces):
+                mesh.iface = np.where(np.array(mesh.faces)[:, 0] == f[1] and np.array(mesh.faces)[:, 1] == f[1])[0][0]
+                
+            if mesh.iface == -1:
+                mesh.faces.append(f)
+                mesh.owner.append(i)
+                mesh.neighbour.append(0)
+                vf = mesh.xnod[f[1],:] - mesh.xnod[f[0],:]
+                cf = (mesh.xnod[f[0],:] + mesh.xnod[f[1],:])/2.0
+                mesh.Sf.append([vf[1],-vf[0]])
+                mesh.Cf.append(list(cf))   
+                
+                v = v + np.dot(cf, mesh.Sf[-1])
+            else:
+                print('a')
+                mesh.neighbour[mesh.iface] = i;
+                v = v - np.dot(np.take(mesh.Cf, mesh.iface), np.take(mesh.Sf, mesh.iface))
+
+        mesh.V.append(v/2)
     
         
     % To store element to face map

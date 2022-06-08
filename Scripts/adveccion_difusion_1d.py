@@ -14,12 +14,12 @@ from plotly.offline import plot
 # CONSTANTES ----------------------------------------------------------------#
 L = 1        # Largo de barra [m]
 S = 1        # Área transversal [m2]
-Q = 0     # Fuente/(rho*Cp) [°C/s]
-alpha = 0.05 # Difusividad [m2/s]  k/(rho*Cp)
+Q = 0.01    # Fuente/(rho*Cp) [°C/s]
+alpha = 0.5 # Difusividad [m2/s]  k/(rho*Cp)
 V = 1
 # Condiciones de Borde de Dirichlet (sobre la temperatura) ------------------#
 phi_0 = 0
-phi_L = 1
+phi_L = 0
 
 def analytic_solution(x):
     PeL = 0.5*V*L/alpha

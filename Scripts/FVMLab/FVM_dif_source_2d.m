@@ -32,11 +32,19 @@ bf = find(Mesh.neighbour == 0);
 patches = BCs(Mesh.xnod, Mesh.faces, bf);
 
 [Ad, bd] = assemble_diffusion(Mesh, patches, nu);
-bs = assemble_source(Mesh, patches, Q)
+bs = assemble_source(Mesh, patches, Q);
 
-b = bd + bs;
+% Construyo el array de velocidad (un vector para cada cara)
+v = zeros(Mesh.nfaces, 2);
+v(:, 1) = 1;
 
-phi = Ad\b;
+% Término advectivo
+[Aa, ba] = assemble_advection(Mesh, patches, v, 'CD');
+
+A = Ad + Aa;
+b = bd + bs + ba;
+
+phi = A\b;
 
 view2d_by_ele(Mesh.xnod, Mesh.icone, phi);
 axis equal;
