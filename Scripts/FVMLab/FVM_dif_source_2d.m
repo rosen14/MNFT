@@ -1,7 +1,7 @@
-% FVM 2D difusion estacionaria con fuente
+% FVM 2D
 % -div(nu*grad(phi)) = S
-% MNFT 2021
-% Juan M. Gimenez, Santiago Márquez Damián
+% MNFT 2022
+% Rosendo Jesús Fazzari
 clear variables;
 close all;
 
@@ -10,16 +10,15 @@ addpath 'meshFiles';
 warning("off");
 
 %% USER PARAMETERS %%%%%%
-% Caso placa cuadrangulos
-% Archivo de nodos
-%file_xnod = 'xnod_placa';
-% Archivo de conectividades
-%file_icone = 'icone_placa_quad';
 % Funcion de condiciones de borde
 BCs = @placa;
 % Difusividad
-nu = 0.5;
-Q = 0.01
+nu = 0;
+Q = 0;
+deltaT = 0.01;
+t_max = 0.5;
+theta = 0.5;
+
 %% END USER PARAMETERS %%%
 
 % generacion de las estructuras geometricas
@@ -37,16 +36,30 @@ bs = assemble_source(Mesh, patches, Q);
 % Construyo el array de velocidad (un vector para cada cara)
 v = zeros(Mesh.nfaces, 2);
 v(:, 1) = 1;
-
+%v = ones(Mesh.nfaces, 2);
 % Término advectivo
 [Aa, ba] = assemble_advection(Mesh, patches, v, 'CD');
 
 A = Ad + Aa;
 b = bd + bs + ba;
 
+
+M = Mesh.V.*eye(Mesh.ncells)/deltaT + A*theta;
+M_inv = inv(M);
+
+t = 0;
+phi_init = zeros(Mesh.ncells,1);
+phi_k = phi_init;
+while t < t_max
+  R = b + phi_k.*Mesh.V/deltaT - A*(1 - theta)*phi_k;
+  phi_k1 = M_inv*R;
+  t = t + deltaT;
+  phi_k = phi_k1;
+end
+
 phi = A\b;
 
-view2d_by_ele(Mesh.xnod, Mesh.icone, phi);
+view2d_by_ele(Mesh.xnod, Mesh.icone, phi_k);
 axis equal;
 
 colormap jet;

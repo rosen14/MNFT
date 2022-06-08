@@ -18,8 +18,8 @@ Q = 0.01    # Fuente/(rho*Cp) [°C/s]
 alpha = 0.5 # Difusividad [m2/s]  k/(rho*Cp)
 V = 1
 # Condiciones de Borde de Dirichlet (sobre la temperatura) ------------------#
-phi_0 = 0
-phi_L = 0
+phi_0 = 1
+phi_L = 2
 
 def analytic_solution(x):
     PeL = 0.5*V*L/alpha
@@ -81,6 +81,8 @@ def numerical_solution(n, upwind = True, second_order_dirichlet = True):
     return x_centroides, phi_numerical
 
 
+xc, phi_numerical_cd = numerical_solution(10, upwind = False, second_order_dirichlet = False)
+
 #----------------------------- Tarea 19/05/2022 -----------------------------#
 ## a) PeL = 10 ; N = 40 celdas
 #### i) Calcular nro de Pe de malla: 
@@ -124,6 +126,7 @@ fig.add_trace(
         mode='lines', name = 'Analytic'))
 
 plot(fig, auto_open=True)
+
 
 #-------------
 

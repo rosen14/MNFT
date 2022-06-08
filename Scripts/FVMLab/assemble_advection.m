@@ -13,21 +13,33 @@ function [A, b] = assemble_advection(Mesh, patches, v, aprox)
             d = norm(dv, 2);
 
             if aprox == 'UW'
-              A(o, o) = A(o, o) + dot(v(iface, :),Mesh.Sf(iface, :));
-              A(n, o) = A(n, o) - dot(v(iface, :),Mesh.Sf(iface, :));
+              if dot(v(iface, :),Mesh.Sf(iface, :)) > 0
+                A(o, o) = A(o, o) + dot(v(iface, :),Mesh.Sf(iface, :));
+                A(n, o) = A(n, o) - dot(v(iface, :),Mesh.Sf(iface, :));
+              else
+                A(n, n) = A(n, n) - dot(v(iface, :),Mesh.Sf(iface, :));
+                A(o, n) = A(o, n) + dot(v(iface, :),Mesh.Sf(iface, :));
+               end
             elseif aprox == 'CD'
-              fx = norm(Mesh.C(n, :) - Mesh.Cf(iface, :),2)/d;
-              A(o, o) = A(o, o) + fx*dot(v(iface, :),Mesh.Sf(iface, :));
-              A(o, n) = A(o, n) + (1-fx)*dot(v(iface, :),Mesh.Sf(iface, :));
-              A(n, o) = A(n, o) - fx*dot(v(iface, :),Mesh.Sf(iface, :));
-              A(n, n) = A(n, n) - (1-fx)*dot(v(iface, :),Mesh.Sf(iface, :));
+              if dot(v(iface, :),Mesh.Sf(iface, :)) > 0
+                fx = norm(Mesh.C(n, :) - Mesh.Cf(iface, :),2)/d;
+                A(o, o) = A(o, o) + fx*dot(v(iface, :),Mesh.Sf(iface, :));
+                A(o, n) = A(o, n) + (1-fx)*dot(v(iface, :),Mesh.Sf(iface, :));
+                A(n, o) = A(n, o) - fx*dot(v(iface, :),Mesh.Sf(iface, :));
+                A(n, n) = A(n, n) - (1-fx)*dot(v(iface, :),Mesh.Sf(iface, :));
+              else
+                fx = norm(Mesh.C(o, :) - Mesh.Cf(iface, :),2)/d;
+                A(n, n) = A(n, n) - fx*dot(v(iface, :),Mesh.Sf(iface, :));
+                A(n, o) = A(n, o) - (1-fx)*dot(v(iface, :),Mesh.Sf(iface, :));
+                A(o, n) = A(o, n) + fx*dot(v(iface, :),Mesh.Sf(iface, :));
+                A(o, o) = A(o, o) + (1-fx)*dot(v(iface, :),Mesh.Sf(iface, :));
+              end
             endif
 
 
 
          else
             % tratamiento de caras de frontera
-
             phib = -1;
             for ipatch = 1:length(patches)
                 if find(patches{ipatch}.faces == iface)
@@ -35,19 +47,23 @@ function [A, b] = assemble_advection(Mesh, patches, v, aprox)
                     break;
                 end
             end
-            if aprox == 'UW'
+            if strcmp(phib.type, 'Dirichlet')
+              if aprox == 'UW'
+                if dot(v(iface, :),Mesh.Sf(iface, :)) > 0
+                  A(o, o) = A(o, o) + dot(v(iface, :),Mesh.Sf(iface, :));
+                else
+                  b(o) = b(o) - phib.value*dot(v(iface, :),Mesh.Sf(iface, :));
+                end
+              elseif aprox == 'CD'
+                b(o) = b(o) - phib.value*dot(v(iface, :),Mesh.Sf(iface, :));
+              end
+
+            elseif strcmp(phib.type, 'None')
               if dot(v(iface, :),Mesh.Sf(iface, :)) > 0
                 A(o, o) = A(o, o) + dot(v(iface, :),Mesh.Sf(iface, :));
               else
-                b(o) = b(o) + phib.value*dot(v(iface, :),Mesh.Sf(iface, :));
+                b(o) = b(o) - phib.value*dot(v(iface, :),Mesh.Sf(iface, :));
               end
             end
-            if aprox == 'CD'
-              if dot(v(iface, :),Mesh.Sf(iface, :)) > 0
-                b(o) = b(o) - phib.value*dot(v(iface, :),Mesh.Sf(iface, :));
-              else
-                b(o) = b(o) + phib.value*dot(v(iface, :),Mesh.Sf(iface, :));
-              end
-             end
          end
 end
