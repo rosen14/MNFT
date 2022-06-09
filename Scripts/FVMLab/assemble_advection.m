@@ -58,11 +58,14 @@ function [A, b] = assemble_advection(Mesh, patches, v, aprox)
                 b(o) = b(o) - phib.value*dot(v(iface, :),Mesh.Sf(iface, :));
               end
 
-            elseif strcmp(phib.type, 'None')
+            elseif strcmp(phib.type, 'Neumann')
+            %Revisar esta implementación de Neumann
+              d = norm(Mesh.C(o, :) - Mesh.Cf(iface, :),2);
               if dot(v(iface, :),Mesh.Sf(iface, :)) > 0
                 A(o, o) = A(o, o) + dot(v(iface, :),Mesh.Sf(iface, :));
+                b(o) = b(o) - phib.value*d*dot(v(iface, :),Mesh.Sf(iface, :));
               else
-                b(o) = b(o) - phib.value*dot(v(iface, :),Mesh.Sf(iface, :));
+                b(o) = b(o) - phib.value*d*dot(v(iface, :),Mesh.Sf(iface, :));
               end
             end
          end

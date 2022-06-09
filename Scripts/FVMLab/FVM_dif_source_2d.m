@@ -34,9 +34,9 @@ patches = BCs(Mesh.xnod, Mesh.faces, bf);
 bs = assemble_source(Mesh, patches, Q);
 
 % Construyo el array de velocidad (un vector para cada cara)
-v = zeros(Mesh.nfaces, 2);
-v(:, 1) = 1;
-%v = ones(Mesh.nfaces, 2);
+%v = zeros(Mesh.nfaces, 2);
+%v(:, 1) = 1;
+v = ones(Mesh.nfaces, 2);
 % Término advectivo
 [Aa, ba] = assemble_advection(Mesh, patches, v, 'CD');
 
@@ -65,6 +65,7 @@ axis equal;
 colormap jet;
 colorbar;
 
+figure(2);clf;plot(Mesh.xnod(24:42),phi_k(2:20))
 #phi(1:10)
 
 %  %ejemplo postproceso sampling sobre curvas en mallas de triangulos
@@ -78,3 +79,7 @@ colorbar;
 % phin = ele_field_to_nod_field(xnod,icone,phi);
 % phiC = griddata(xnod(:,1),xnod(:,2),phin,xx,yy);
 % figure(2);clf;plot(yy,phiC);legend('phi sobre el eje central')
+
+
+%Mesh.xnod(24:42)
+%figure(2);clf;plot(Mesh.xnod(24:42),phi(2:19))
