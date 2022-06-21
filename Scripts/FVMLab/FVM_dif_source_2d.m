@@ -38,7 +38,7 @@ bs = assemble_source(Mesh, patches, Q);
 %v(:, 1) = 1;
 v = ones(Mesh.nfaces, 2);
 % Término advectivo
-[Aa, ba] = assemble_advection(Mesh, patches, v, 'CD');
+[Aa, ba] = assemble_advection(Mesh, patches, v, 'UW');
 
 A = Ad + Aa;
 b = bd + bs + ba;

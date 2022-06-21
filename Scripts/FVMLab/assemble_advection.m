@@ -48,6 +48,7 @@ function [A, b] = assemble_advection(Mesh, patches, v, aprox)
                 end
             end
             if strcmp(phib.type, 'Dirichlet')
+<<<<<<< HEAD
               if aprox == 'UW'
                 if dot(v(iface, :),Mesh.Sf(iface, :)) > 0
                   A(o, o) = A(o, o) + dot(v(iface, :),Mesh.Sf(iface, :));
@@ -64,8 +65,21 @@ function [A, b] = assemble_advection(Mesh, patches, v, aprox)
               if dot(v(iface, :),Mesh.Sf(iface, :)) > 0
                 A(o, o) = A(o, o) + dot(v(iface, :),Mesh.Sf(iface, :));
                 b(o) = b(o) - phib.value*d*dot(v(iface, :),Mesh.Sf(iface, :));
+=======
+              if dot(v(iface, :),Mesh.Sf(iface, :)) > 0
+                b(o) = b(o) - phib.value*dot(v(iface, :),Mesh.Sf(iface, :));
+>>>>>>> 933214e (FVM HR)
               else
                 b(o) = b(o) - phib.value*d*dot(v(iface, :),Mesh.Sf(iface, :));
+              end
+            elseif strcmp(phib.type, 'Neumann')
+              if dot(v(iface, :),Mesh.Sf(iface, :)) > 0
+                d = norm(Mesh.C(o, :) - Mesh.Cf(iface, :),2);
+                A(o, o) = A(o, o) + dot(v(iface, :),Mesh.Sf(iface, :));
+                b(o) = b(o) - phib.value*d*dot(v(iface, :),Mesh.Sf(iface, :));
+              else
+                A(o, o) = A(o, o) + dot(v(iface, :),Mesh.Sf(iface, :));
+                b(o) = b(o) + phib.value*d*dot(v(iface, :),Mesh.Sf(iface, :));
               end
             end
          end
