@@ -16,7 +16,7 @@ BCs = @placa;
 nu = 0;
 Q = 0;
 deltaT = 0.01;
-t_max = 1.2;
+t_max = 0.5;
 theta = 0.5;
 
 
@@ -32,9 +32,9 @@ filename = 'plano_triang_regular.msh';
 Mesh = gen2DMesh(filename);
 
 % Construyo el array de velocidad (un vector para cada cara)
-%v = zeros(Mesh.nfaces, 2);
-%v(:, 1) = 1;
-v = ones(Mesh.nfaces, 2);
+v = zeros(Mesh.nfaces, 2);
+v(:, 1) = 1;
+%v = ones(Mesh.nfaces, 2);
 
 
 
@@ -42,9 +42,10 @@ v = ones(Mesh.nfaces, 2);
 bf = find(Mesh.neighbour == 0);
 patches = BCs(Mesh.xnod, Mesh.faces, bf);
 
-phi_init = zeros(Mesh.ncells,1);
-phi_k = phi_init;
+%phi_init = zeros(Mesh.ncells,1);
 
+phi_init = initial_condition(Mesh);
+phi_k = phi_init;
 %a)
 
 
@@ -54,7 +55,7 @@ phi_k = phi_init;
 bs = assemble_source(Mesh, patches, Q);
 
 
-tvd_sch = 'superbee';
+tvd_sch = 'minmod';
 t = 0;
 while t <= t_max
   t
