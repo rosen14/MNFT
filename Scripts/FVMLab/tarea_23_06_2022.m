@@ -15,8 +15,8 @@ BCs = @placa;
 % Difusividad
 nu = 0;
 Q = 0;
-deltaT = 0.01;
-t_max = 0.5;
+deltaT = 0.005;
+t_max = 0.3;
 theta = 0.5;
 
 
@@ -27,8 +27,8 @@ theta = 0.5;
 % generacion de las estructuras geometricas
 %make_data;
 %filename = 'plano_triang.msh';
-filename = 'plano_triang_regular.msh';
-%filename = 'barra1D.msh';
+%filename = 'plano_triang_regular.msh';
+filename = 'barra1D.msh';
 Mesh = gen2DMesh(filename);
 
 % Construyo el array de velocidad (un vector para cada cara)

@@ -42,8 +42,9 @@ function [A, b] = assemble_advection_hr(Mesh, patches, v, psif)
                 b(o) = b(o) - phib.value*dot(v(iface, :),Mesh.Sf(iface, :));
               end
             elseif strcmp(phib.type, 'Neumann')
+              d = norm(Mesh.C(o, :) - Mesh.Cf(iface, :),2);
               if dot(v(iface, :),Mesh.Sf(iface, :)) > 0
-                d = norm(Mesh.C(o, :) - Mesh.Cf(iface, :),2);
+
                 A(o, o) = A(o, o) + dot(v(iface, :),Mesh.Sf(iface, :));
                 b(o) = b(o) - phib.value*d*dot(v(iface, :),Mesh.Sf(iface, :));
               else
