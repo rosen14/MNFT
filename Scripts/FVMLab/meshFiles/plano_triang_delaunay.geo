@@ -2,9 +2,11 @@ N = 40;
 L = 1;
 dx = L/N;
 
+Mesh.Algorithm = 5;
+
 Point(1) = {0, 0, 0};
 Point(2) = {L, 0, 0};
-Point(3) = {L, L, 0;
+Point(3) = {L, L, 0};
 Point(4) = {0, L, 0};
 Line(1) = {4, 1};
 Line(2) = {1, 2};

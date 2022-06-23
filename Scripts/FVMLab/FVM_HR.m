@@ -26,15 +26,15 @@ theta = 0.5;
 
 % generacion de las estructuras geometricas
 %make_data;
-%filename = 'plano_triang.msh';
-filename = 'plano_triang_regular.msh';
+filename = 'plano_triang_delaunay.msh';
+%filename = 'plano_triang_regular.msh';
 %filename = 'barra1D.msh';
 Mesh = gen2DMesh(filename);
 
 % Construyo el array de velocidad (un vector para cada cara)
-v = zeros(Mesh.nfaces, 2);
-v(:, 1) = 1;
-%v = ones(Mesh.nfaces, 2);
+%v = zeros(Mesh.nfaces, 2);
+%v(:, 1) = 1;
+v = ones(Mesh.nfaces, 2);
 
 
 
@@ -42,9 +42,9 @@ v(:, 1) = 1;
 bf = find(Mesh.neighbour == 0);
 patches = BCs(Mesh.xnod, Mesh.faces, bf);
 
-%phi_init = zeros(Mesh.ncells,1);
+phi_init = zeros(Mesh.ncells,1);
 
-phi_init = initial_condition(Mesh);
+%phi_init = initial_condition(Mesh);
 phi_k = phi_init;
 %a)
 
@@ -55,7 +55,7 @@ phi_k = phi_init;
 bs = assemble_source(Mesh, patches, Q);
 
 
-tvd_sch = 'minmod';
+tvd_sch = 'upwind';
 t = 0;
 while t <= t_max
   t
@@ -80,7 +80,7 @@ axis equal;
 colormap jet;
 colorbar;
 
-#phi(1:10)
+%phi_k(1:40)
 
 %  %ejemplo postproceso sampling sobre curvas en mallas de triangulos
 %  TR = triangulation(icone,xnod);
