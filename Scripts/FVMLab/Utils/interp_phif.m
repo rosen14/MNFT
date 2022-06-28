@@ -8,11 +8,16 @@ function Mesh = interp_phif(Mesh, patches, phi_k, v, tvd_sch)
          n = Mesh.neighbour(iface);
          S = norm(Mesh.Sf(iface, :), 2);
          if n>0
+            % Calculo phif siguiendo el gf de pag. 160 Moukalled
             % tratamiento de caras internas
+            ef = Mesh.Sf(iface,:)/norm(Mesh.Sf(iface,:),2); % surface unit vector
+            d_Cf = Mesh.Cf(iface, :) - Mesh.C(o, :);
+            d_fF = Mesh.C(n, :) - Mesh.Cf(iface, :);
             dv = Mesh.C(n, :) - Mesh.C(o, :);
             d = norm(dv, 2);
-            fx = norm(Mesh.C(o, :) - Mesh.Cf(iface, :),2)/d;
-            Mesh.phif(iface) = phi_k(n)*fx + (1-fx)*phi_k(o);
+            gf = dot(d_Cf, ef)/(dot(d_Cf, ef) + dot(d_fF, ef));
+
+            Mesh.phif(iface) = phi_k(n)*gf + (1-gf)*phi_k(o);
 
             Mesh.grad(o, :) = Mesh.grad(o, :) + Mesh.phif(iface)*Mesh.Sf(iface, :)/Mesh.V(o);
             Mesh.grad(n, :) = Mesh.grad(n, :) - Mesh.phif(iface)*Mesh.Sf(iface, :)/Mesh.V(n);
@@ -46,6 +51,7 @@ function Mesh = interp_phif(Mesh, patches, phi_k, v, tvd_sch)
          n = Mesh.neighbour(iface);
          S = norm(Mesh.Sf(iface, :), 2);
          if n>0
+           dv = Mesh.C(n, :) - Mesh.C(o, :);
            if dot(v(iface, :),Mesh.Sf(iface, :)) > 0
              Mesh.rf(iface) = 2*dot(Mesh.grad(o, :), dv)/(phi_k(n) - phi_k(o) + 1e-12) - 1;
            else

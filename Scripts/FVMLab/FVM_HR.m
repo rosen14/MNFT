@@ -27,8 +27,8 @@ theta = 0.5;
 % generacion de las estructuras geometricas
 %make_data;
 %filename = 'plano_triang_delaunay.msh';
-%filename = 'plano_triang_regular.msh';
-filename = 'barra1D.msh';
+filename = 'plano_regular.msh';
+%filename = 'barra1D.msh';
 Mesh = gen2DMesh(filename);
 
 % Construyo el array de velocidad (un vector para cada cara)
@@ -44,7 +44,7 @@ patches = BCs(Mesh.xnod, Mesh.faces, bf);
 
 phi_init = zeros(Mesh.ncells,1);
 
-%phi_init = initial_condition(Mesh);
+%phi_init = initial_condition(Mesh, 'suave');
 phi_k = phi_init;
 %a)
 
@@ -55,7 +55,7 @@ phi_k = phi_init;
 bs = assemble_source(Mesh, patches, Q);
 
 
-tvd_sch = 'minmod';
+tvd_sch = 'superbee';
 t = 0;
 while t <= t_max
   t
