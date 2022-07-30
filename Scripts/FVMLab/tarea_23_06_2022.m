@@ -15,8 +15,8 @@ BCs = @placa;
 % Difusividad
 nu = 0;
 Q = 0;
-deltaT = 0.005;
-t_max = 0.3;
+deltaT = 0.001;
+t_max = 0.1;
 theta = 0.5;
 
 
@@ -34,7 +34,6 @@ Mesh = gen2DMesh(filename);
 % Construyo el array de velocidad (un vector para cada cara)
 v = zeros(Mesh.nfaces, 2);
 v(:, 1) = 1;
-%v = ones(Mesh.nfaces, 2);
 
 
 
@@ -44,12 +43,8 @@ patches = BCs(Mesh.xnod, Mesh.faces, bf);
 
 %phi_init = zeros(Mesh.ncells,1);
 
-choice = 'step';
+choice = 'suave';
 phi_init = initial_condition(Mesh, choice);
-
-%a)
-
-
 
 
 [Ad, bd] = assemble_diffusion(Mesh, patches, nu);
@@ -116,12 +111,28 @@ end
 phi_k_minmod = phi_k1;
 
 
-x = Mesh.C(1:100)
-plot (x, phi_k_minmod(1:100), "-o", x, phi_k_superbee(1:100), "-*", x, phi_k_upwind(1:100), "-+")
+phi_func = zeros(Mesh.ncells,1);
+if strcmp(choice, 'step')
+  for cell = 1:Mesh.ncells
+    if ((1/6 + t_max < Mesh.C(cell, 1)) && (Mesh.C(cell, 1) < 0.5 + t_max))
+      phi_func(cell) = 1;
+    endif
+  endfor
+else
+   for cell = 1:Mesh.ncells
+     if ((1/6 + t_max < Mesh.C(cell, 1)) && (Mesh.C(cell, 1) < 0.5 + t_max))
+      phi_func(cell) = sin(3*pi*(Mesh.C(cell, 1)-1/6 - t_max))**2;
+     endif
+   endfor
+endif
+
+
+x = Mesh.C(:, 1);
+plot (x, phi_k_minmod, "-o", x, phi_k_superbee, "-*", x, phi_k_upwind, "-+", x, phi_func, '-');
 
 ## Placing legend inside should return axes to original size
-legend ({"Minmod", "SuperBee", "UpWind"} , "location", "northwest");
-title('Función inicial suave a 0.5s')
+legend ({"Minmod", "SuperBee", "UpWind", "Exact"} , "location", "northwest");
+
 
 
 
