@@ -1,4 +1,4 @@
-function b = assemble_diffusion(Mesh, patches, Q)
+function b = assemble_diffusion(Mesh, Q)
 
     b = zeros(Mesh.ncells, 1);
 
