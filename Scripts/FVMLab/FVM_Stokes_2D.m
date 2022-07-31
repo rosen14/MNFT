@@ -16,7 +16,7 @@ BCs_v = @placa_v;
 BCs_p = @placa_p;
 BCs_none = @placa_none;
 % Difusividad
-nu = 1;
+nu = 10; #Viscosidad cinemática m2/s
 Q = 0;
 
 
@@ -52,8 +52,14 @@ wv = 0.7;
 wp = 0.3;
 
 d = eye(Mesh.ncells, 'logical');
-nExtIt = 500;
+nExtIt = 100;
 nIntIt = 1;
+
+A_x(d) = (1/wv).*A_x(d); %Verificar
+A_y(d) = (1/wv).*A_y(d);
+
+bs_x = assemble_source(Mesh, Q);
+bs_y = assemble_source(Mesh, Q);
 for iExtIt = 1:1:nExtIt
 
   iExtIt
@@ -61,17 +67,15 @@ for iExtIt = 1:1:nExtIt
   #en las caras y luego hacer gradiente Gauss
   [Pf, grad_P] = interp_phif_v2(Mesh, patches_p, P_k);
 
-  bs_x = assemble_source(Mesh, Q);
-  bs_y = assemble_source(Mesh, Q);
+
 
   bP_x = assemble_source(Mesh, - grad_P(:, 1));
   bP_y = assemble_source(Mesh, - grad_P(:, 2));
 
-  b_relax_x = (1-wv)/wv * diag(A_x).*u_n;
-  b_relax_y = (1-wv)/wv * diag(A_y).*v_n;
+  b_relax_x = ((1-wv)/wv) * diag(Ad_x).*u_n;
+  b_relax_y = ((1-wv)/wv) * diag(Ad_y).*v_n;
 
-  A_x(d) = 1/wv*A_x(d); %Verificar
-  A_y(d) = 1/wv*A_y(d);
+
 
   b_x = b_relax_x + bs_x + bd_x + bP_x;
   b_y = b_relax_y + bs_y + bd_y + bP_y;
@@ -80,21 +84,22 @@ for iExtIt = 1:1:nExtIt
   u_n1 = A_x\b_x;
   v_n1 = A_y\b_y;
   for iIntit = 1:1:nIntIt
+    iIntit
     #Matriz A promedio
     A = (A_x + A_y)/2;
     #Interpolar 1/aP en caras
-    inv_aP = Mesh.V./diag(A);
+    inv_aP = 1./(diag(A)./(Mesh.V));
 
-    inv_aPf = interp_phif_v2(Mesh, patches_none, inv_aP);
+    [inv_aPf, _] = interp_phif_v2(Mesh, patches_none, inv_aP);
     %
     %Computo H
-    H_x = 1./(Mesh.V).*(-(A*u_n1 - diag(A).*u_n1) + bs_x);
-    H_y = 1./(Mesh.V).*(-(A*v_n1 - diag(A).*v_n1) + bs_y);
+    H_x = (-(A*u_n1 - diag(A).*u_n1) + bs_x + bd_x + b_relax_x)./(Mesh.V);
+    H_y = (-(A*v_n1 - diag(A).*v_n1) + bs_y + bd_y + b_relax_y)./(Mesh.V);
     %Interpolar H/ap en caras (H/ap)f
-    inv_aP_Hf_x = interp_phif_v2(Mesh, patches_none, inv_aP.*H_x);
-    inv_aP_Hf_y = interp_phif_v2(Mesh, patches_none, inv_aP.*H_y);
+    [inv_aP_Hf_x, _] = interp_phif_v2(Mesh, patches_none, inv_aP.*H_x);
+    [inv_aP_Hf_y, _] = interp_phif_v2(Mesh, patches_none, inv_aP.*H_y);
     inv_aP_Hf = [inv_aP_Hf_x, inv_aP_Hf_y];
-    [div_inv_aP_Hf] = fvc_div(inv_aP_Hf, Mesh); #Término derecho de la ec. de Presión
+    [div_inv_aP_Hf] = 1.*fvc_div(inv_aP_Hf, Mesh); #Término derecho de la ec. de Presión
     %Ensamble de ecuación de presión. Análogo a difusión con fuente.
     [Ap, bp] = assemble_diffusion(Mesh, patches_p, -inv_aPf);
     bp = bp + div_inv_aP_Hf; #Ensamblo el lado derecho completo
@@ -116,7 +121,7 @@ for iExtIt = 1:1:nExtIt
 
 endfor
 
-view2d_by_ele(Mesh.xnod, Mesh.icone, u_n1);
+view2d_by_ele(Mesh.xnod, Mesh.icone, P_k);
 axis equal;
 
 colormap jet;

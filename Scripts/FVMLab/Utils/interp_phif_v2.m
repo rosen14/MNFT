@@ -11,8 +11,6 @@ function [phif, grad] = interp_phif_v2(Mesh, patches, phi_k)
             ef = Mesh.Sf(iface,:)/norm(Mesh.Sf(iface,:),2); % surface unit vector
             d_Cf = Mesh.Cf(iface, :) - Mesh.C(o, :);
             d_fF = Mesh.C(n, :) - Mesh.Cf(iface, :);
-            dv = Mesh.C(n, :) - Mesh.C(o, :);
-            d = norm(dv, 2);
             gf = dot(d_Cf, ef)/(dot(d_Cf, ef) + dot(d_fF, ef));
 
             phif(iface) = phi_k(n)*gf + (1-gf)*phi_k(o);
