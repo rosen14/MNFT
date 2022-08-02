@@ -11,7 +11,7 @@ function [patches] = placa_v(xnod, faces, bf)
     f_bot = abs(xnod(faces(bf,1),2)-xmin(2))<1e-3 & abs(xnod(faces(bf,2),2)-xmin(2))<1e-3; f_bot = bf(f_bot);
 
 
-    patches{1}.faces = f_left; patches{1}.name = 'left'; patches{1}.type = 'Neumann'; patches{1}.value = 0;
+    patches{1}.faces = f_left; patches{1}.name = 'left'; patches{1}.type = 'Dirichlet'; patches{1}.value = 0;
     patches{2}.faces = f_right; patches{2}.name = 'right'; patches{2}.type = 'Neumann'; patches{2}.value = 0;
     patches{3}.faces = f_top; patches{3}.name = 'top'; patches{3}.type = 'Dirichlet'; patches{3}.value = 0;
     patches{4}.faces = f_bot;patches{4}.name = 'bottom'; patches{4}.type = 'Dirichlet'; patches{4}.value = 0;

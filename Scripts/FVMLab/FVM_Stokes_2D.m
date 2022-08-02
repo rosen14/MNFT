@@ -16,7 +16,7 @@ BCs_v = @placa_v;
 BCs_p = @placa_p;
 BCs_none = @placa_none;
 % Difusividad
-nu = 1; #Viscosidad cinemática m2/s
+nu = 0.03; #Viscosidad cinemática m2/s
 Q = 0;
 
 
@@ -52,13 +52,13 @@ wv = 0.7;
 wp = 0.3;
 
 d = eye(Mesh.ncells, 'logical');
-nExtIt = 500;
+nExtIt = 100;
 nIntIt = 1;
 
 
 bs_x = assemble_source(Mesh, Q);
 bs_y = assemble_source(Mesh, Q);
-tvd_sch = 'central_diff';
+tvd_sch = 'upwind';#'central_diff';
 for iExtIt = 1:1:nExtIt
   iExtIt
 
@@ -68,7 +68,8 @@ for iExtIt = 1:1:nExtIt
   [un_psif] = get_psif(Mesh, patches_u, u_n, vel, u_nf, grad_u_n, tvd_sch);
   [vn_psif] = get_psif(Mesh, patches_v, v_n, vel, v_nf, grad_v_n, tvd_sch);
 
-  %Mesh = interp_phif(Mesh, patches, u_n, vel, tvd_sch);
+  %[Aa_x, ba_x] = assemble_advection_hr(Mesh, patches_u, vel, un_psif);
+  %[Aa_y, ba_y] = assemble_advection_hr(Mesh, patches_v, vel, vn_psif);
   [Aa_x, ba_x] = assemble_advection_hr_flux(Mesh, patches_u, flux, un_psif);
   [Aa_y, ba_y] = assemble_advection_hr_flux(Mesh, patches_v, flux, vn_psif);
 
@@ -104,8 +105,8 @@ for iExtIt = 1:1:nExtIt
     [inv_aPf, _] = interp_phif_v2(Mesh, patches_none, inv_aP);
     %
     %Computo H
-    H_x = (-(A*u_n1 - diag(A).*u_n1) + bs_x + bd_x + ba_x + b_relax_x)./(Mesh.V);
-    H_y = (-(A*v_n1 - diag(A).*v_n1) + bs_y + bd_y + ba_y + b_relax_y)./(Mesh.V);
+    H_x = (-(A*u_n1 - diag(A).*u_n1) + bs_x + bd_x + 0.*ba_x + b_relax_x)./(Mesh.V);
+    H_y = (-(A*v_n1 - diag(A).*v_n1) + bs_y + bd_y + 0.*ba_y + b_relax_y)./(Mesh.V);
     %Interpolar H/ap en caras (H/ap)f
     [inv_aP_Hf_x, _] = interp_phif_v2(Mesh, patches_none, inv_aP.*H_x);
     [inv_aP_Hf_y, _] = interp_phif_v2(Mesh, patches_none, inv_aP.*H_y);
@@ -113,12 +114,22 @@ for iExtIt = 1:1:nExtIt
     [div_inv_aP_Hf] = 1.*fvc_div(inv_aP_Hf, Mesh); #Término derecho de la ec. de Presión
     %Ensamble de ecuación de presión. Análogo a difusión con fuente.
     [Ap, bp] = assemble_diffusion(Mesh, patches_p, -inv_aPf);
+    #Fijo la presión en la celda 8 ya que el sistema es indeterminado (Presión
+    #no fija en ninguna parte debido a Neumann en todas los bordes)
+
     bp = bp + div_inv_aP_Hf; #Ensamblo el lado derecho completo
+
+    #bp(200) = bp(200) + Ap(200, 200)*0;
+    #Ap(200, 200) = 2*Ap(200, 200);
+    #El tema de fijar la presion en un punto creo que es la solucion al problema
+    #Ap(150:150:end, 150:150:end) = Ap(150:150:end, 150:150:end) + 1000;
+
     P_k1 = Ap\bp; #Presión en celdas
 
     %Corrección de flujos
     [flux_p] = Eqn_flux(Mesh, patches_p, -inv_aPf, Ap, P_k1);
     flux = dot(inv_aP_Hf, Mesh.Sf, 2) - flux_p;
+    [sum_flux_cell] = sum_flux_cells(flux, Mesh);
     %Relajación de p
     P_k1 = wp*P_k1 + (1 - wp)*P_k;
     P_k = P_k1;
@@ -132,11 +143,13 @@ for iExtIt = 1:1:nExtIt
 
 endfor
 
-view2d_by_ele(Mesh.xnod, Mesh.icone, P_k);
+view2d_by_ele(Mesh.xnod, Mesh.icone, u_n1);
 axis equal;
 
 colormap jet;
 colorbar;
+
+
 
 
 
