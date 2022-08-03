@@ -12,7 +12,7 @@ function [A, b] = assemble_advection_hr_flux(Mesh, patches, flux, psif)
             dv = Mesh.C(n, :) - Mesh.C(o, :);
             d = norm(dv, 2);
 
-            if flux > 0
+            if flux(iface) > 0
               fx = norm(Mesh.C(n, :) - Mesh.Cf(iface, :),2)/d;
               A(o, o) = A(o, o) + (1 - 0.5*psif(iface))*flux(iface);
               A(o, n) = A(o, n) + 0.5*psif(iface)*flux(iface);
@@ -26,6 +26,7 @@ function [A, b] = assemble_advection_hr_flux(Mesh, patches, flux, psif)
               A(o, o) = A(o, o) + 0.5*psif(iface)*flux(iface);
             endif
 
+
          else
             % tratamiento de caras de frontera
             phib = -1;
@@ -36,7 +37,7 @@ function [A, b] = assemble_advection_hr_flux(Mesh, patches, flux, psif)
                 end
             end
             if strcmp(phib.type, 'Dirichlet')
-              if flux > 0
+              if flux(iface) > 0
                 b(o) = b(o) - phib.value*flux(iface);
               else
                 b(o) = b(o) - phib.value*flux(iface);
